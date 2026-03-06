@@ -79,11 +79,13 @@ public class ProfesorController {
     @PostMapping("/{id}/observaciones")
     public ResponseEntity<Profesor> actualizarObservaciones(
             @PathVariable Long id,
-            @RequestBody String nuevasObservaciones) {
+            @RequestBody(required = false) Object nuevasObservaciones) { // Cambiado String por Object
 
         return repository.findById(id).map(profesor -> {
-            // Si el texto llega nulo, ponemos vacío
-            profesor.setObservaciones(nuevasObservaciones != null ? nuevasObservaciones : "");
+            // Si no llega nada, ponemos "", si llega algo, lo convertimos a String
+            String textoLimpio = (nuevasObservaciones == null) ? "" : nuevasObservaciones.toString().trim();
+            profesor.setObservaciones(textoLimpio);
+
             Profesor actualizado = repository.save(profesor);
             return ResponseEntity.ok(actualizado);
         }).orElse(ResponseEntity.notFound().build());
