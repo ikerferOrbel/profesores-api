@@ -79,10 +79,12 @@ public class ProfesorController {
     @PostMapping("/{id}/observaciones")
     public ResponseEntity<Profesor> actualizarObservaciones(
             @PathVariable Long id,
-            @RequestParam(required = false) String texto) { // Usamos RequestParam en lugar de RequestBody
+            @RequestBody(required = false) String nuevasObservaciones) { // required = false es la clave
 
         return repository.findById(id).map(profesor -> {
-            profesor.setObservaciones(texto != null ? texto : "");
+            // Si nuevasObservaciones es null (body vacío), guardamos un texto vacío ""
+            profesor.setObservaciones(nuevasObservaciones != null ? nuevasObservaciones : "");
+
             Profesor actualizado = repository.save(profesor);
             return ResponseEntity.ok(actualizado);
         }).orElse(ResponseEntity.notFound().build());
