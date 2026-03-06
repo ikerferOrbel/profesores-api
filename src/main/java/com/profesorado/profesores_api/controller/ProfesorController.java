@@ -83,7 +83,7 @@ public class ProfesorController {
             @RequestBody String nuevasObservaciones) {
 
         return repository.findById(id).map(profesor -> {
-            profesor.setObservaciones(nuevasObservaciones);
+            profesor.setObservaciones(nuevasObservaciones != null ? nuevasObservaciones : "");
             Profesor actualizado = repository.save(profesor);
             return ResponseEntity.ok(actualizado);
         }).orElse(ResponseEntity.notFound().build());
