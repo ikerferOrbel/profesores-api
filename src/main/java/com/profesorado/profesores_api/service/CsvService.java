@@ -48,6 +48,8 @@ public class CsvService {
                 // --- 1. DATOS BÁSICOS DIRECTOS ---
                 if (fila.length > 3)
                     profesor.setTitulacion(fila[3].trim());
+                if (fila.length > 4)
+                    profesor.setObservaciones(fila[4].trim()); // <--- AÑADE ESTA LÍNEA (Columna 4)
                 if (fila.length > 7)
                     profesor.setLocalidad(fila[7].trim());
                 if (fila.length > 32)

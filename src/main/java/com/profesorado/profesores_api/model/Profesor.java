@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 @Table(name = "profesores")
 public class Profesor {
 
-    //ATRIBUTOS
+    // ATRIBUTOS
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,11 +40,14 @@ public class Profesor {
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
 
+    @Column(columnDefinition = "TEXT")
+    private String observaciones;
+
     public enum Sexo {
         M, F
     }
 
-    //GETTERS Y SETTERS
+    // GETTERS Y SETTERS
 
     public Long getId() {
         return id;
@@ -108,5 +111,13 @@ public class Profesor {
 
     public void setSexo(Sexo sexo) {
         this.sexo = sexo;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }

@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,17 +46,22 @@ public class ProfesorController {
             @RequestParam(required = false) Integer experiencia_horas,
             @RequestParam(required = false) String precio,
             @RequestParam(required = false) Sexo sexo) {
-            
+
         return repository.findAll().stream()
-                .filter(p -> titulacion == null || (p.getTitulacion() != null && p.getTitulacion().toLowerCase().contains(titulacion.toLowerCase())))
-                .filter(p -> cursos == null || (p.getCursos() != null && p.getCursos().toLowerCase().contains(cursos.toLowerCase())))
-                .filter(p -> localidad == null || (p.getLocalidad() != null && p.getLocalidad().equalsIgnoreCase(localidad)))
-                
-                .filter(p -> experiencia_anio == null || (p.getExperiencia_anio() != null && p.getExperiencia_anio() >= experiencia_anio))
-                .filter(p -> experiencia_horas == null || (p.getExperiencia_horas() != null && p.getExperiencia_horas() >= experiencia_horas))
-                
+                .filter(p -> titulacion == null || (p.getTitulacion() != null
+                        && p.getTitulacion().toLowerCase().contains(titulacion.toLowerCase())))
+                .filter(p -> cursos == null
+                        || (p.getCursos() != null && p.getCursos().toLowerCase().contains(cursos.toLowerCase())))
+                .filter(p -> localidad == null
+                        || (p.getLocalidad() != null && p.getLocalidad().equalsIgnoreCase(localidad)))
+
+                .filter(p -> experiencia_anio == null
+                        || (p.getExperiencia_anio() != null && p.getExperiencia_anio() >= experiencia_anio))
+                .filter(p -> experiencia_horas == null
+                        || (p.getExperiencia_horas() != null && p.getExperiencia_horas() >= experiencia_horas))
+
                 .filter(p -> precio == null || (p.getPrecio() != null && p.getPrecio().contains(precio)))
-                
+
                 .filter(p -> sexo == null || p.getSexo() == sexo)
                 .collect(Collectors.toList());
     }
@@ -67,6 +74,19 @@ public class ProfesorController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al importar el CSV: " + e.getMessage());
         }
+    }
+
+    // Nuevo método para actualizar observaciones
+    @PostMapping("/{id}/observaciones")
+    public ResponseEntity<Profesor> actualizarObservaciones(
+            @PathVariable Long id,
+            @RequestBody String nuevasObservaciones) {
+
+        return repository.findById(id).map(profesor -> {
+            profesor.setObservaciones(nuevasObservaciones);
+            Profesor actualizado = repository.save(profesor);
+            return ResponseEntity.ok(actualizado);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
 }
