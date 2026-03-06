@@ -53,6 +53,13 @@ public class CsvService {
                 if (fila.length > 32)
                     profesor.setPrecio(fila[32].trim()); // Columna 32 ( PRECIO)
 
+                // NUEVO: Lógica para Observaciones (Columna 8)
+                if (fila.length > 8 && fila[8] != null) {
+                    profesor.setObservaciones(fila[8].trim());
+                } else {
+                    profesor.setObservaciones(""); // Si no hay nada, guardamos texto vacío
+                }
+
                 // --- 2. SEXO --- (Columna 2)
                 if (fila.length > 2 && fila[2] != null && !fila[2].trim().isEmpty()) {
                     try {
