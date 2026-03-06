@@ -76,14 +76,16 @@ public class ProfesorController {
         }
     }
 
-    // Nuevo método para actualizar observaciones
     @PostMapping("/{id}/observaciones")
     public ResponseEntity<Profesor> actualizarObservaciones(
             @PathVariable Long id,
-            @RequestBody String nuevasObservaciones) {
+            @RequestBody java.util.Map<String, String> body) {
 
         return repository.findById(id).map(profesor -> {
+            // Extraemos el valor de la llave "notas" que enviaremos desde el cliente
+            String nuevasObservaciones = body.get("notas");
             profesor.setObservaciones(nuevasObservaciones != null ? nuevasObservaciones : "");
+
             Profesor actualizado = repository.save(profesor);
             return ResponseEntity.ok(actualizado);
         }).orElse(ResponseEntity.notFound().build());
