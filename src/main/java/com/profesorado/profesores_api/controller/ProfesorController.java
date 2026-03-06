@@ -83,8 +83,8 @@ public class ProfesorController {
 
         return repository.findById(id).map(profesor -> {
             // Si el body viene vacío o es nulo, ponemos texto vacío
-            String textoLimpio = (nuevasObservaciones == null) ? "" : nuevasObservaciones.trim();
-            profesor.setObservaciones(textoLimpio);
+//            String textoLimpio = (nuevasObservaciones == null) ? "" : nuevasObservaciones.trim();
+//            profesor.setObservaciones(textoLimpio);
 
             Profesor actualizado = repository.save(profesor);
             return ResponseEntity.ok(actualizado);

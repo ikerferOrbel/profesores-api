@@ -40,8 +40,8 @@ public class Profesor {
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
 
-    @Column(columnDefinition = "TEXT")
-    private String observaciones;
+//    @Column(columnDefinition = "TEXT")
+//    private String observaciones;
 
     public enum Sexo {
         M, F
@@ -113,11 +113,11 @@ public class Profesor {
         this.sexo = sexo;
     }
 
-    public String getObservaciones() {
-        return observaciones;
-    }
+//    public String getObservaciones() {
+//       return observaciones;
+//    }
 
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
+//    public void setObservaciones(String observaciones) {
+//        this.observaciones = observaciones;
+//    }
 }
