@@ -82,6 +82,8 @@ public class CsvService {
                 profesoresASalvar.add(profesor);
             }
 
+            repository.deleteAll();
+
             // Guardamos todos de golpe en MySQL
             repository.saveAll(profesoresASalvar);
         }
