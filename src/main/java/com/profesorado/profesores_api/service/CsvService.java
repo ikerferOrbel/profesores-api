@@ -35,41 +35,52 @@ public class CsvService {
 
     public void procesarCsv(MultipartFile file) throws Exception {
         try (Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-                CSVReader csvReader = new CSVReader(reader)) {
+             CSVReader csvReader = new CSVReader(reader)) {
 
             List<String[]> records = csvReader.readAll();
             List<Profesor> profesoresASalvar = new ArrayList<>();
 
-            // Empezamos en 1 para saltar la primera fila (las cabeceras del CSV)
+            // Empezamos en 1 para saltar la fila de cabeceras
             for (int i = 1; i < records.size(); i++) {
                 String[] fila = records.get(i);
+                
+                // Validación mínima de longitud de fila para evitar errores
+                if (fila.length < 2) continue;
+
                 Profesor profesor = new Profesor();
 
-                // --- 1. DATOS BÁSICOS DIRECTOS ---
-                if (fila.length > 3)
-                    profesor.setTitulacion(fila[3].trim());
-                if (fila.length > 7)
-                    profesor.setLocalidad(fila[7].trim());
-                if (fila.length > 32)
-                    profesor.setPrecio(fila[32].trim()); // Columna 32 ( PRECIO)
-
-                // NUEVO: Lógica para Observaciones (Columna 8)
-                if (fila.length > 8 && fila[8] != null) {
-                    profesor.setObservaciones(fila[8].trim());
-                } else {
-                    profesor.setObservaciones(""); // Si no hay nada, guardamos texto vacío
+                // --- 1. NOMBRE (Columna 1 del CSV) ---
+                if (fila.length > 1 && fila[1] != null) {
+                    profesor.setNombre(fila[1].trim());
                 }
 
-                // --- 2. SEXO --- (Columna 2)
+                // --- 2. SEXO (Columna 2 del CSV) ---
                 if (fila.length > 2 && fila[2] != null && !fila[2].trim().isEmpty()) {
                     try {
                         profesor.setSexo(Profesor.Sexo.valueOf(fila[2].trim().toUpperCase()));
                     } catch (IllegalArgumentException e) {
-                        profesor.setSexo(null); // Si en el CSV hay algo raro, se queda nulo en la BD
+                        profesor.setSexo(null);
                     }
                 }
 
-                // --- 3. CURSOS --- (Columnas 11 a 29)
+                // --- 3. TITULACIÓN (Columna 3 del CSV) ---
+                if (fila.length > 3) {
+                    profesor.setTitulacion(fila[3].trim());
+                }
+
+                // --- 4. OBSERVACIONES (Columna 4 del CSV: "OBERV.") ---
+                if (fila.length > 4 && fila[4] != null) {
+                    profesor.setObservaciones(fila[4].trim());
+                } else {
+                    profesor.setObservaciones("");
+                }
+
+                // --- 5. LOCALIDAD / PROVINCIA (Columna 7 del CSV) ---
+                if (fila.length > 7) {
+                    profesor.setLocalidad(fila[7].trim());
+                }
+
+                // --- 6. CURSOS (Columnas 11 a 29) ---
                 List<String> cursosDelProfesor = new ArrayList<>();
                 for (int col = 11; col <= 29; col++) {
                     if (col < fila.length && "SI".equalsIgnoreCase(fila[col].trim())) {
@@ -78,38 +89,39 @@ public class CsvService {
                 }
                 profesor.setCursos(String.join(", ", cursosDelProfesor));
 
-                // --- 4. EXPERIENCIA --- (Columna 31)
-                // Usamos el método de abajo para separar el texto en años y horas
+                // --- 7. EXPERIENCIA (Columna 31 del CSV) ---
                 String experienciaCsv = (fila.length > 31) ? fila[31] : "";
                 procesarExperiencia(experienciaCsv, profesor);
 
-                // Añadimos el profesor listo a la lista
+                // --- 8. PRECIO (Columna 32 del CSV) ---
+                if (fila.length > 32) {
+                    profesor.setPrecio(fila[32].trim());
+                }
+
                 profesoresASalvar.add(profesor);
             }
 
+            // Limpiamos la base de datos antes de importar los nuevos datos
             repository.deleteAll();
 
-            // Guardamos todos de golpe en MySQL
+            // Guardamos todos los registros procesados
             repository.saveAll(profesoresASalvar);
         }
     }
 
     /**
-     * Método auxiliar que convierte "100H+2AÑOS" en dos enteros para la base de
-     * datos
+     * Lógica para separar texto como "100H+2AÑOS" en campos numéricos
      */
     private void procesarExperiencia(String experienciaCSV, Profesor profesor) {
-        // Si no hay experiencia en el CSV o tiene el símbolo raro "?¿", ponemos 0
         if (experienciaCSV == null || experienciaCSV.trim().isEmpty() || experienciaCSV.contains("?¿")) {
             profesor.setExperiencia_horas(0);
             profesor.setExperiencia_anio(0);
             return;
         }
 
-        // Limpiamos los espacios y pasamos a minúsculas ("2 AÑO" -> "2año")
         String textoLimpio = experienciaCSV.toLowerCase().replace(" ", "");
 
-        // Extraer HORAS
+        // Extraer HORAS (ej: "100h")
         Pattern patronHoras = Pattern.compile("(\\d+)h");
         Matcher matcherHoras = patronHoras.matcher(textoLimpio);
         if (matcherHoras.find()) {
@@ -118,7 +130,7 @@ public class CsvService {
             profesor.setExperiencia_horas(0);
         }
 
-        // Extraer AÑOS
+        // Extraer AÑOS (ej: "2año" o "2años")
         Pattern patronAnos = Pattern.compile("(\\d+)año");
         Matcher matcherAnos = patronAnos.matcher(textoLimpio);
         if (matcherAnos.find()) {

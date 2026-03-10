@@ -19,6 +19,9 @@ public class Profesor {
     private Long id;
 
     @Column(length = 1000)
+    private String nombre;
+
+    @Column(length = 1000)
     private String titulacion;
 
     @Column(length = 1000)
@@ -55,6 +58,14 @@ public class Profesor {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+        public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getTitulacion() {
